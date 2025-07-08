@@ -1,8 +1,12 @@
 pipeline {
     agent any
 
-    stages {
+    environment {
+        DOTNET_ROOT = 'C:\\Program Files\\dotnet'
+        PATH = "${env.PATH};C:\\Program Files\\dotnet"
+    }
 
+    stages {
         stage('Clone') {
             steps {
                 echo '📥 Cloning source code'
@@ -13,6 +17,7 @@ pipeline {
         stage('Restore Packages') {
             steps {
                 echo '🔧 Restoring NuGet packages...'
+                bat 'dotnet --version'
                 bat 'dotnet restore MyWebApp/MyWebApp.csproj'
             }
         }
@@ -51,11 +56,11 @@ pipeline {
 
         stage('Deploy to IIS') {
             steps {
-                echo '🌐 Deploying to IIS - creating site if not exists...'
+                echo '🌐 Deploying to IIS...'
                 powershell '''
                     Import-Module WebAdministration
                     if (-not (Test-Path IIS:\\Sites\\MySite)) {
-                        New-Website -Name "MySite" -Port 81 -PhysicalPath "C:\\wwwroot\\myproject" -ApplicationPool ".NET v4.5"
+                        New-Website -Name "MySite" -Port 81 -PhysicalPath "C:\\test1-netcore" -ApplicationPool ".NET v4.5"
                     }
                 '''
             }
